@@ -86,35 +86,8 @@ def register(mcp: FastMCP) -> None:
             ),
         ] = True,
     ) -> dict:
-        """Send a message to a Discord channel via webhook.
-
-        At least one of 'content' or 'embeds' must be provided.  The returned
-        message object includes an 'id' field that can be used with
-        get_webhook_message / edit_webhook_message / delete_webhook_message.
-
-        Simple text example:
-            content="Build #42 succeeded! :rocket:"
-
-        Embed example:
-            embeds=[{
-                "title": "Build #42",
-                "description": "All 156 tests passed",
-                "color": 3066993,
-                "fields": [{"name": "Branch", "value": "main", "inline": True}]
-            }]
-
-        Poll example:
-            poll={
-                "question": {"text": "Deploy to production?"},
-                "answers": [
-                    {"poll_media": {"text": "Yes"}},
-                    {"poll_media": {"text": "No"}}
-                ]
-            }
-
-        Silent message (no notification):
-            flags=["SUPPRESS_NOTIFICATIONS"]
-        """
+        """Post a message to Discord. Supports text, embeds, polls, link
+        buttons, silent flags, and forum thread creation (use thread_name)."""
         if not content and not embeds and not poll:
             raise ToolError(
                 "At least one of 'content', 'embeds', or 'poll' must be provided."
@@ -154,11 +127,7 @@ def register(mcp: FastMCP) -> None:
             Field(description="Thread ID if the message is in a thread"),
         ] = None,
     ) -> dict:
-        """Retrieve a previously-sent webhook message by its ID.
-
-        Returns the full message object including content, embeds, author, and
-        timestamp.
-        """
+        """Fetch a previously-sent message. Useful for reading poll results."""
         return await client.get_message(message_id, thread_id=thread_id)
 
     # ---
@@ -194,11 +163,7 @@ def register(mcp: FastMCP) -> None:
             ),
         ] = None,
     ) -> dict:
-        """Edit a previously-sent webhook message.
-
-        Only provide the fields you want to change — all parameters are optional.
-        Returns the updated message object.
-        """
+        """Update content, embeds, or buttons on a message you sent."""
         payload = client.build_message_payload(
             content=content,
             embeds=embeds,
@@ -226,10 +191,7 @@ def register(mcp: FastMCP) -> None:
             Field(description="Thread ID if the message is in a thread"),
         ] = None,
     ) -> dict:
-        """Delete a message previously sent by this webhook.
-
-        This cannot be undone. Returns confirmation on success.
-        """
+        """Remove a message."""
         return await client.delete_message(message_id, thread_id=thread_id)
 
     # ---
@@ -243,26 +205,19 @@ def register(mcp: FastMCP) -> None:
         avatar: Annotated[
             str | None,
             Field(
-                description="New avatar for the webhook — base64 image data "
-                "(data:image/...;base64,...) or a URL"
+                description="Base64-encoded image data (data:image/...;base64,...)",
             ),
         ] = None,
     ) -> dict:
-        """Change the webhook's display name and/or avatar.
-
-        All parameters are optional — only provide what you want to change.
-        Returns the updated webhook object.
-        """
+        """Rename the webhook and/or change its avatar."""
         return await client.modify_webhook(name=name, avatar=avatar)
 
     # ---
 
     @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True})
     async def delete_webhook() -> dict:
-        """Permanently delete this webhook.
-
-        THIS CANNOT BE UNDONE. The webhook URL will stop working immediately.
-        """
+        ) -> dict:
+            """Permanently delete this webhook. Cannot be undone."""
         return await client.delete_webhook()
 
     # ---
@@ -326,15 +281,7 @@ def register(mcp: FastMCP) -> None:
             ),
         ] = True,
     ) -> dict:
-        """Upload a file to a Discord channel via webhook.
-
-        The file at 'file_path' is read from the local filesystem and uploaded
-        as a message attachment.  You can optionally include a text message
-        and/or embeds alongside the file.
-
-        Supported file types include images, text files, PDFs, and more
-        (Discord's 25 MiB limit applies).
-        """
+        """Upload a local file to Discord with an optional caption."""
         return await client.send_file(
             file_path=file_path,
             filename=filename,
@@ -354,9 +301,6 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(annotations={"readOnlyHint": True})
     async def get_webhook_info() -> dict:
-        """Get information about this webhook (name, avatar, channel, guild).
-
-        Useful for verifying the webhook URL is valid and checking which
-        channel it posts to.
-        """
+        ) -> dict:
+            """Get webhook metadata (name, channel, guild)."""
         return await client.get_info()

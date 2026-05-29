@@ -12,9 +12,9 @@ from . import server
 mcp = FastMCP(
     "Discord Webhook",
     instructions=(
-        "Send messages to Discord via webhooks. "
-        "Use send_webhook_message for one-off notifications, "
-        "and edit/delete with the returned message_id for updates."
+        "Post messages, embeds, files, polls, and link buttons to Discord via webhook. "
+        "Works in regular channels, threads, and forum channels (with thread creation). "
+        "Messages return an id for later editing, deleting, or poll-result checking."
     ),
 )
 
