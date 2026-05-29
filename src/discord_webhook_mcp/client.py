@@ -16,7 +16,7 @@ from typing import NoReturn
 import httpx
 from fastmcp.exceptions import ToolError
 
-from .models import AllowedMentions, Embed, Poll
+from .models import ActionRow, AllowedMentions, Embed, Poll
 
 # ---------------------------------------------------------------------------
 # URL helpers
@@ -108,6 +108,7 @@ async def send_message(
     poll: Poll | dict | None = None,
     thread_name: str | None = None,
     applied_tags: list[str] | None = None,
+    components: Sequence[ActionRow | dict] | None = None,
 ) -> dict:
     """POST a message to the webhook URL. Returns the message object or status."""
     params: dict[str, str] = {}
@@ -127,6 +128,12 @@ async def send_message(
         body["thread_name"] = thread_name
     if applied_tags is not None:
         body["applied_tags"] = applied_tags
+    if components is not None:
+        params["with_components"] = "true"
+        body["components"] = [
+            ActionRow(**c).model_dump() if isinstance(c, dict) else c.model_dump()
+            for c in components
+        ]
 
     async with httpx.AsyncClient(timeout=30) as client:
         response = await client.post(get_webhook_url(), json=body, params=params)

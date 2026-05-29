@@ -181,3 +181,32 @@ class MessageFlag(BaseModel):
             if bit is not None:
                 value |= bit
         return value
+
+
+class Button(BaseModel):
+    """A link button in a message component row.
+
+    Only link buttons (style 5) work for non-application-owned webhooks.
+    Interactive buttons require an application-owned webhook.
+    """
+
+    type: int = 2  # Always 2 for button
+    style: Literal[5] = 5  # Link button
+    label: Annotated[str, Field(description="Button text (max 80 characters)")]
+    url: Annotated[
+        str,
+        Field(description="URL the button opens (must be http:// or https://)"),
+    ]
+    disabled: Annotated[bool, Field(description="Whether the button is greyed out")] = (
+        False
+    )
+
+
+class ActionRow(BaseModel):
+    """A row of up to 5 buttons."""
+
+    type: int = 1  # Always 1 for action row
+    components: Annotated[
+        list[Button],
+        Field(description="Buttons in this row (max 5 per row, max 5 rows total)"),
+    ]

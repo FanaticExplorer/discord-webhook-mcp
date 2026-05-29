@@ -10,7 +10,7 @@ from fastmcp.exceptions import ToolError
 from pydantic import Field
 
 from . import client
-from .models import AllowedMentions, Embed, MessageFlag, Poll
+from .models import ActionRow, AllowedMentions, Embed, MessageFlag, Poll
 
 
 def register(mcp: FastMCP) -> None:
@@ -69,6 +69,13 @@ def register(mcp: FastMCP) -> None:
             list[str] | None,
             Field(
                 description="Tag IDs to apply to the new thread (forum/media channels only)"
+            ),
+        ] = None,
+        components: Annotated[
+            list[ActionRow] | None,
+            Field(
+                description="Message components — up to 5 action rows with link buttons. "
+                "Each row can have up to 5 buttons that open URLs."
             ),
         ] = None,
         wait: Annotated[
@@ -131,6 +138,7 @@ def register(mcp: FastMCP) -> None:
             poll=poll,
             thread_name=thread_name,
             applied_tags=applied_tags,
+            components=components,
         )
 
     # ---
