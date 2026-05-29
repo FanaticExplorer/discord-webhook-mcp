@@ -6,8 +6,11 @@ requests, and returns parsed responses or raises ToolError.
 
 from __future__ import annotations
 
+import json
+import mimetypes
 import os
 from collections.abc import Sequence
+from pathlib import Path
 from typing import NoReturn
 
 import httpx
@@ -168,6 +171,89 @@ async def delete_message(
 
     if response.status_code == 204:
         return {"status": "deleted", "message_id": message_id}
+    _raise_api_error(response)
+
+
+async def modify_webhook(
+    *,
+    name: str | None = None,
+    avatar: str | None = None,
+) -> dict:
+    """PATCH the webhook itself — change name and/or avatar."""
+    payload: dict = {}
+    if name is not None:
+        payload["name"] = name
+    if avatar is not None:
+        payload["avatar"] = avatar
+
+    if not payload:
+        raise ToolError("At least one of 'name' or 'avatar' must be provided.")
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.patch(get_webhook_url(), json=payload)
+
+    if response.status_code == 200:
+        return response.json()
+    _raise_api_error(response)
+
+
+async def send_file(
+    file_path: str,
+    *,
+    filename: str | None = None,
+    description: str | None = None,
+    content: str | None = None,
+    embeds: Sequence[Embed | dict] | None = None,
+    username: str | None = None,
+    avatar_url: str | None = None,
+    wait: bool = True,
+    thread_id: str | None = None,
+) -> dict:
+    """POST a message with a file attachment via multipart/form-data."""
+    path = Path(file_path)
+    if not path.is_file():
+        raise ToolError(f"File not found: {file_path}")
+
+    name = filename or path.name
+    mime_type, _ = mimetypes.guess_type(str(path))
+    file_bytes = path.read_bytes()
+
+    json_body: dict = {
+        "attachments": [{"id": 0, "filename": name}],
+    }
+    if description:
+        json_body["attachments"][0]["description"] = description
+    if content is not None:
+        json_body["content"] = content
+    if embeds:
+        json_body["embeds"] = _serialize_embeds(embeds)
+    if username is not None:
+        json_body["username"] = username
+    if avatar_url is not None:
+        json_body["avatar_url"] = avatar_url
+
+    params: dict[str, str] = {}
+    if wait:
+        params["wait"] = "true"
+    if thread_id:
+        params["thread_id"] = thread_id
+
+    form_data = {
+        "payload_json": (None, json.dumps(json_body), "application/json"),
+        "files[0]": (name, file_bytes, mime_type or "application/octet-stream"),
+    }
+
+    async with httpx.AsyncClient(timeout=60) as client:
+        response = await client.post(
+            get_webhook_url(),
+            files=form_data,
+            params=params,
+        )
+
+    if response.status_code == 204:
+        return {"status": "sent"}
+    if response.status_code in (200, 201):
+        return response.json()
     _raise_api_error(response)
 
 

@@ -170,6 +170,96 @@ def register(mcp: FastMCP) -> None:
 
     # ---
 
+    @mcp.tool(annotations={"readOnlyHint": False})
+    async def modify_webhook(
+        name: Annotated[
+            str | None,
+            Field(description="New display name for the webhook (1-80 characters)"),
+        ] = None,
+        avatar: Annotated[
+            str | None,
+            Field(
+                description="New avatar for the webhook — base64 image data "
+                "(data:image/...;base64,...) or a URL"
+            ),
+        ] = None,
+    ) -> dict:
+        """Change the webhook's display name and/or avatar.
+
+        All parameters are optional — only provide what you want to change.
+        Returns the updated webhook object.
+        """
+        return await client.modify_webhook(name=name, avatar=avatar)
+
+    # ---
+
+    @mcp.tool(annotations={"readOnlyHint": False})
+    async def send_webhook_file(
+        file_path: Annotated[
+            str,
+            Field(description="Local path to the file to upload"),
+        ],
+        filename: Annotated[
+            str | None,
+            Field(description="Override the filename shown in Discord"),
+        ] = None,
+        description: Annotated[
+            str | None,
+            Field(
+                description="Alt text / description for the file (max 1024 characters)"
+            ),
+        ] = None,
+        content: Annotated[
+            str | None,
+            Field(description="Optional text message to send alongside the file"),
+        ] = None,
+        embeds: Annotated[
+            list[Embed] | None,
+            Field(description="Optional embeds to include alongside the file"),
+        ] = None,
+        username: Annotated[
+            str | None,
+            Field(description="Override the default webhook display name"),
+        ] = None,
+        avatar_url: Annotated[
+            str | None,
+            Field(description="Override the default webhook avatar image URL"),
+        ] = None,
+        thread_id: Annotated[
+            str | None,
+            Field(description="Send to a specific thread instead of the main channel"),
+        ] = None,
+        wait: Annotated[
+            bool,
+            Field(
+                description="Wait for Discord to confirm and return the created message "
+                "(includes the message id for later editing/deleting)"
+            ),
+        ] = True,
+    ) -> dict:
+        """Upload a file to a Discord channel via webhook.
+
+        The file at 'file_path' is read from the local filesystem and uploaded
+        as a message attachment.  You can optionally include a text message
+        and/or embeds alongside the file.
+
+        Supported file types include images, text files, PDFs, and more
+        (Discord's 25 MiB limit applies).
+        """
+        return await client.send_file(
+            file_path=file_path,
+            filename=filename,
+            description=description,
+            content=content,
+            embeds=embeds,
+            username=username,
+            avatar_url=avatar_url,
+            wait=wait,
+            thread_id=thread_id,
+        )
+
+    # ---
+
     @mcp.tool(annotations={"readOnlyHint": True})
     async def get_webhook_info() -> dict:
         """Get information about this webhook (name, avatar, channel, guild).
