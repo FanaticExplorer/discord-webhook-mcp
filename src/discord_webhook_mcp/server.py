@@ -58,6 +58,19 @@ def register(mcp: FastMCP) -> None:
             Poll | None,
             Field(description="A poll to attach to the message (2-10 answers)"),
         ] = None,
+        thread_name: Annotated[
+            str | None,
+            Field(
+                description="Name for a new thread in a forum/media channel. "
+                "Creates a properly-titled thread instead of dumping into the feed."
+            ),
+        ] = None,
+        applied_tags: Annotated[
+            list[str] | None,
+            Field(
+                description="Tag IDs to apply to the new thread (forum/media channels only)"
+            ),
+        ] = None,
         wait: Annotated[
             bool,
             Field(
@@ -116,6 +129,8 @@ def register(mcp: FastMCP) -> None:
             thread_id=thread_id,
             flags=flag_bits,
             poll=poll,
+            thread_name=thread_name,
+            applied_tags=applied_tags,
         )
 
     # ---
@@ -226,6 +241,16 @@ def register(mcp: FastMCP) -> None:
 
     # ---
 
+    @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True})
+    async def delete_webhook() -> dict:
+        """Permanently delete this webhook.
+
+        THIS CANNOT BE UNDONE. The webhook URL will stop working immediately.
+        """
+        return await client.delete_webhook()
+
+    # ---
+
     @mcp.tool(annotations={"readOnlyHint": False})
     async def send_webhook_file(
         file_path: Annotated[
@@ -262,6 +287,14 @@ def register(mcp: FastMCP) -> None:
             str | None,
             Field(description="Send to a specific thread instead of the main channel"),
         ] = None,
+        thread_name: Annotated[
+            str | None,
+            Field(description="Name for a new thread in a forum/media channel"),
+        ] = None,
+        applied_tags: Annotated[
+            list[str] | None,
+            Field(description="Tag IDs to apply to the new thread"),
+        ] = None,
         wait: Annotated[
             bool,
             Field(
@@ -289,6 +322,8 @@ def register(mcp: FastMCP) -> None:
             avatar_url=avatar_url,
             wait=wait,
             thread_id=thread_id,
+            thread_name=thread_name,
+            applied_tags=applied_tags,
         )
 
     # ---

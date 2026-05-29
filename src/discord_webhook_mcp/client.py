@@ -106,6 +106,8 @@ async def send_message(
     thread_id: str | None = None,
     flags: int | None = None,
     poll: Poll | dict | None = None,
+    thread_name: str | None = None,
+    applied_tags: list[str] | None = None,
 ) -> dict:
     """POST a message to the webhook URL. Returns the message object or status."""
     params: dict[str, str] = {}
@@ -121,6 +123,10 @@ async def send_message(
         if isinstance(poll, dict):
             poll = Poll(**poll)
         body["poll"] = poll.model_dump(exclude_none=True)
+    if thread_name is not None:
+        body["thread_name"] = thread_name
+    if applied_tags is not None:
+        body["applied_tags"] = applied_tags
 
     async with httpx.AsyncClient(timeout=30) as client:
         response = await client.post(get_webhook_url(), json=body, params=params)
@@ -207,6 +213,16 @@ async def modify_webhook(
     _raise_api_error(response)
 
 
+async def delete_webhook() -> dict:
+    """DELETE the webhook permanently. Cannot be undone."""
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.delete(get_webhook_url())
+
+    if response.status_code == 204:
+        return {"status": "deleted"}
+    _raise_api_error(response)
+
+
 async def send_file(
     file_path: str,
     *,
@@ -218,6 +234,8 @@ async def send_file(
     avatar_url: str | None = None,
     wait: bool = True,
     thread_id: str | None = None,
+    thread_name: str | None = None,
+    applied_tags: list[str] | None = None,
 ) -> dict:
     """POST a message with a file attachment via multipart/form-data."""
     path = Path(file_path)
@@ -241,6 +259,10 @@ async def send_file(
         json_body["username"] = username
     if avatar_url is not None:
         json_body["avatar_url"] = avatar_url
+    if thread_name is not None:
+        json_body["thread_name"] = thread_name
+    if applied_tags is not None:
+        json_body["applied_tags"] = applied_tags
 
     params: dict[str, str] = {}
     if wait:
