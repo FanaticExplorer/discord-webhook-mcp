@@ -216,8 +216,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True})
     async def delete_webhook() -> dict:
-        ) -> dict:
-            """Permanently delete this webhook. Cannot be undone."""
+        """Permanently delete this webhook. Cannot be undone."""
         return await client.delete_webhook()
 
     # ---
@@ -301,6 +300,5 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(annotations={"readOnlyHint": True})
     async def get_webhook_info() -> dict:
-        ) -> dict:
-            """Get webhook metadata (name, channel, guild)."""
+        """Get webhook metadata (name, channel, guild)."""
         return await client.get_info()
