@@ -187,6 +187,12 @@ def register(mcp: FastMCP) -> None:
             str | None,
             Field(description="Thread ID if the message is in a thread"),
         ] = None,
+        components: Annotated[
+            list[ActionRow] | None,
+            Field(
+                description="New message components — up to 5 action rows with link buttons"
+            ),
+        ] = None,
     ) -> dict:
         """Edit a previously-sent webhook message.
 
@@ -198,12 +204,14 @@ def register(mcp: FastMCP) -> None:
             embeds=embeds,
             allowed_mentions=allowed_mentions,
         )
-        if not payload:
+        if not payload and not components:
             raise ToolError(
-                "At least one of 'content', 'embeds', or 'allowed_mentions' "
-                "must be provided."
+                "At least one of 'content', 'embeds', 'allowed_mentions', "
+                "or 'components' must be provided."
             )
-        return await client.edit_message(message_id, payload, thread_id=thread_id)
+        return await client.edit_message(
+            message_id, payload, thread_id=thread_id, components=components
+        )
 
     # ---
 
@@ -303,6 +311,13 @@ def register(mcp: FastMCP) -> None:
             list[str] | None,
             Field(description="Tag IDs to apply to the new thread"),
         ] = None,
+        components: Annotated[
+            list[ActionRow] | None,
+            Field(
+                description="Message components — up to 5 action rows with link buttons. "
+                "Each row can have up to 5 buttons that open URLs."
+            ),
+        ] = None,
         wait: Annotated[
             bool,
             Field(
@@ -332,6 +347,7 @@ def register(mcp: FastMCP) -> None:
             thread_id=thread_id,
             thread_name=thread_name,
             applied_tags=applied_tags,
+            components=components,
         )
 
     # ---

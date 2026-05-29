@@ -167,13 +167,24 @@ async def edit_message(
     payload: dict,
     *,
     thread_id: str | None = None,
+    components: Sequence[ActionRow | dict] | None = None,
 ) -> dict:
     """PATCH an existing webhook message."""
-    params = {"thread_id": thread_id} if thread_id else None
+    body = dict(payload)
+    params: dict[str, str] = {}
+    if thread_id:
+        params["thread_id"] = thread_id
+    if components is not None:
+        params["with_components"] = "true"
+        body["components"] = [
+            ActionRow(**c).model_dump() if isinstance(c, dict) else c.model_dump()
+            for c in components
+        ]
+
     url = f"{get_webhook_url()}/messages/{message_id}"
 
     async with httpx.AsyncClient(timeout=30) as client:
-        response = await client.patch(url, json=payload, params=params)
+        response = await client.patch(url, json=body, params=params)
 
     if response.status_code == 200:
         return response.json()
@@ -243,6 +254,7 @@ async def send_file(
     thread_id: str | None = None,
     thread_name: str | None = None,
     applied_tags: list[str] | None = None,
+    components: Sequence[ActionRow | dict] | None = None,
 ) -> dict:
     """POST a message with a file attachment via multipart/form-data."""
     path = Path(file_path)
@@ -270,12 +282,19 @@ async def send_file(
         json_body["thread_name"] = thread_name
     if applied_tags is not None:
         json_body["applied_tags"] = applied_tags
+    if components is not None:
+        json_body["components"] = [
+            ActionRow(**c).model_dump() if isinstance(c, dict) else c.model_dump()
+            for c in components
+        ]
 
     params: dict[str, str] = {}
     if wait:
         params["wait"] = "true"
     if thread_id:
         params["thread_id"] = thread_id
+    if components is not None:
+        params["with_components"] = "true"
 
     form_data = {
         "payload_json": (None, json.dumps(json_body), "application/json"),
