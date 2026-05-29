@@ -1,7 +1,7 @@
 [project]
 name = "discord-webhook-mcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "MCP server for posting to Discord via webhooks"
 readme = "README.md"
 authors = [
     { name = "andrew", email = "the.fanatic.explorer@gmail.com" }
