@@ -102,7 +102,7 @@ def register(mcp: FastMCP) -> None:
             allowed_mentions=allowed_mentions,
         )
 
-        flag_bits = MessageFlag.from_names(flags) if flags else None
+        flag_bits = int(sum(MessageFlag[f] for f in flags)) if flags else None
         return await client.send_message(
             payload,
             wait=wait,

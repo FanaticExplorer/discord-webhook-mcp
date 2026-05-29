@@ -4,6 +4,7 @@ FastMCP auto-generates JSON Schema from these so LLMs see the exact
 shape of data they need to provide.
 """
 
+from enum import IntFlag
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
@@ -165,22 +166,11 @@ class Poll(BaseModel):
     ] = None
 
 
-class MessageFlag(BaseModel):
+class MessageFlag(IntFlag):
     """Bitfield flag values for webhook messages."""
 
-    # Bitfield values
-    SUPPRESS_EMBEDS: int = 4
-    SUPPRESS_NOTIFICATIONS: int = 4096
-
-    @classmethod
-    def from_names(cls: type["MessageFlag"], names: list[str]) -> int:
-        """Convert flag name strings to integer bitfield."""
-        value = 0
-        for name in names:
-            bit = getattr(cls, name, None)
-            if bit is not None:
-                value |= bit
-        return value
+    SUPPRESS_EMBEDS = 4
+    SUPPRESS_NOTIFICATIONS = 4096
 
 
 class Button(BaseModel):

@@ -87,11 +87,9 @@ def _raise_api_error(response: httpx.Response) -> NoReturn:
         body = response.json()
         msg = body.get("message", response.text)
         code = body.get("code", "unknown")
-        raise ToolError(f"Discord API error {response.status_code} [{code}]: {msg}")
-    except ToolError:
-        raise
     except Exception:
         raise ToolError(f"Discord API returned {response.status_code}: {response.text}")
+    raise ToolError(f"Discord API error {response.status_code} [{code}]: {msg}")
 
 
 # ---------------------------------------------------------------------------
