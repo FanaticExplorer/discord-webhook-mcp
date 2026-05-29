@@ -112,3 +112,72 @@ class AllowedMentions(BaseModel):
         list[str] | None,
         Field(description="Specific user IDs allowed to mention, max 100"),
     ] = None
+
+
+class PollMedia(BaseModel):
+    """Text or emoji content for a poll answer."""
+
+    text: Annotated[
+        str | None,
+        Field(description="Text for this answer (up to 300 characters)"),
+    ] = None
+    emoji_id: Annotated[
+        str | None,
+        Field(description="Custom emoji ID for this answer"),
+    ] = None
+    emoji_name: Annotated[
+        str | None,
+        Field(description="Emoji name for this answer"),
+    ] = None
+
+
+class PollAnswer(BaseModel):
+    """A single answer option in a poll."""
+
+    poll_media: Annotated[
+        PollMedia,
+        Field(description="The text/emoji content for this answer"),
+    ]
+
+
+class Poll(BaseModel):
+    """A poll that can be attached to a message."""
+
+    question: Annotated[
+        PollMedia,
+        Field(description="The poll question (text field, up to 300 characters)"),
+    ]
+    answers: Annotated[
+        list[PollAnswer],
+        Field(description="Answer options (2-10 required)"),
+    ]
+    duration: Annotated[
+        int | None,
+        Field(
+            description="Duration in hours the poll is open (1-168). Defaults to 24.",
+            ge=1,
+            le=168,
+        ),
+    ] = None
+    allow_multiselect: Annotated[
+        bool | None,
+        Field(description="Whether users can select multiple answers"),
+    ] = None
+
+
+class MessageFlag(BaseModel):
+    """Bitfield flag values for webhook messages."""
+
+    # Bitfield values
+    SUPPRESS_EMBEDS: int = 4
+    SUPPRESS_NOTIFICATIONS: int = 4096
+
+    @classmethod
+    def from_names(cls: type["MessageFlag"], names: list[str]) -> int:
+        """Convert flag name strings to integer bitfield."""
+        value = 0
+        for name in names:
+            bit = getattr(cls, name, None)
+            if bit is not None:
+                value |= bit
+        return value

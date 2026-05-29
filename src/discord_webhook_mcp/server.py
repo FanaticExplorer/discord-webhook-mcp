@@ -10,7 +10,7 @@ from fastmcp.exceptions import ToolError
 from pydantic import Field
 
 from . import client
-from .models import AllowedMentions, Embed
+from .models import AllowedMentions, Embed, MessageFlag, Poll
 
 
 def register(mcp: FastMCP) -> None:
@@ -47,6 +47,17 @@ def register(mcp: FastMCP) -> None:
                 description="Send message to a specific thread instead of the main channel"
             ),
         ] = None,
+        flags: Annotated[
+            list[str] | None,
+            Field(
+                description="Message flags to set. Values: 'SUPPRESS_EMBEDS' (hides link previews), "
+                "'SUPPRESS_NOTIFICATIONS' (silent message, no push/ping)"
+            ),
+        ] = None,
+        poll: Annotated[
+            Poll | None,
+            Field(description="A poll to attach to the message (2-10 answers)"),
+        ] = None,
         wait: Annotated[
             bool,
             Field(
@@ -71,9 +82,23 @@ def register(mcp: FastMCP) -> None:
                 "color": 3066993,
                 "fields": [{"name": "Branch", "value": "main", "inline": True}]
             }]
+
+        Poll example:
+            poll={
+                "question": {"text": "Deploy to production?"},
+                "answers": [
+                    {"poll_media": {"text": "Yes"}},
+                    {"poll_media": {"text": "No"}}
+                ]
+            }
+
+        Silent message (no notification):
+            flags=["SUPPRESS_NOTIFICATIONS"]
         """
-        if not content and not embeds:
-            raise ToolError("At least one of 'content' or 'embeds' must be provided.")
+        if not content and not embeds and not poll:
+            raise ToolError(
+                "At least one of 'content', 'embeds', or 'poll' must be provided."
+            )
 
         payload = client.build_message_payload(
             content=content,
@@ -83,7 +108,15 @@ def register(mcp: FastMCP) -> None:
             embeds=embeds,
             allowed_mentions=allowed_mentions,
         )
-        return await client.send_message(payload, wait=wait, thread_id=thread_id)
+
+        flag_bits = MessageFlag.from_names(flags) if flags else None
+        return await client.send_message(
+            payload,
+            wait=wait,
+            thread_id=thread_id,
+            flags=flag_bits,
+            poll=poll,
+        )
 
     # ---
 
