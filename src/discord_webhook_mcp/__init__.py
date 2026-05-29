@@ -24,3 +24,7 @@ server.register(mcp)
 def main() -> None:
     """Run the Discord Webhook MCP server."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()
