@@ -20,70 +20,57 @@ def register(mcp: FastMCP) -> None:
     async def send_webhook_message(
         content: Annotated[
             str | None,
-            Field(description="Plain text message content (up to 2000 characters)"),
+            Field(description="Message text (max 2000 chars)"),
         ] = None,
         username: Annotated[
             str | None,
-            Field(description="Override the default webhook display name"),
+            Field(description="Custom display name"),
         ] = None,
         avatar_url: Annotated[
             str | None,
-            Field(description="Override the default webhook avatar image URL"),
+            Field(description="Custom avatar URL"),
         ] = None,
-        tts: Annotated[
-            bool, Field(description="Send as a text-to-speech message")
-        ] = False,
+        tts: Annotated[bool, Field(description="Text-to-speech message")] = False,
         embeds: Annotated[
             list[Embed] | None,
-            Field(description="Up to 10 rich embed objects for formatted content"),
+            Field(description="Up to 10 embed objects"),
         ] = None,
         allowed_mentions: Annotated[
             AllowedMentions | None,
-            Field(description="Restrict which @mentions actually trigger pings"),
+            Field(description="Restrict which @mentions ping"),
         ] = None,
         thread_id: Annotated[
             str | None,
-            Field(
-                description="Send message to a specific thread instead of the main channel"
-            ),
+            Field(description="Send to a specific thread"),
         ] = None,
         flags: Annotated[
             list[str] | None,
             Field(
-                description="Message flags to set. Values: 'SUPPRESS_EMBEDS' (hides link previews), "
-                "'SUPPRESS_NOTIFICATIONS' (silent message, no push/ping)"
+                description="Message flags. Options: 'SUPPRESS_EMBEDS' (hide previews), "
+                "'SUPPRESS_NOTIFICATIONS' (silent)"
             ),
         ] = None,
         poll: Annotated[
             Poll | None,
-            Field(description="A poll to attach to the message (2-10 answers)"),
+            Field(description="Poll to attach (2-10 answers)"),
         ] = None,
         thread_name: Annotated[
             str | None,
             Field(
-                description="Name for a new thread in a forum/media channel. "
-                "Creates a properly-titled thread instead of dumping into the feed."
+                description="Thread name (creates new thread in forum/media channels)"
             ),
         ] = None,
         applied_tags: Annotated[
             list[str] | None,
-            Field(
-                description="Tag IDs to apply to the new thread (forum/media channels only)"
-            ),
+            Field(description="Tag IDs for new thread (forum/media only)"),
         ] = None,
         components: Annotated[
             list[ActionRow] | None,
-            Field(
-                description="Message components — up to 5 action rows with link buttons. "
-                "Each row can have up to 5 buttons that open URLs."
-            ),
+            Field(description="Up to 5 action rows with link buttons"),
         ] = None,
         wait: Annotated[
             bool,
-            Field(
-                description="Wait for Discord to confirm and return the created message "
-                "(includes the message id for later editing/deleting)"
-            ),
+            Field(description="Wait for confirmation (returns message ID)"),
         ] = True,
     ) -> dict:
         """Post a message to Discord. Supports text, embeds, polls, link
@@ -140,27 +127,23 @@ def register(mcp: FastMCP) -> None:
         ],
         content: Annotated[
             str | None,
-            Field(description="New plain text content (up to 2000 characters)"),
+            Field(description="New message text (max 2000 chars)"),
         ] = None,
         embeds: Annotated[
             list[Embed] | None,
-            Field(
-                description="New array of up to 10 embed objects (replaces existing)"
-            ),
+            Field(description="Replacement embeds (up to 10)"),
         ] = None,
         allowed_mentions: Annotated[
             AllowedMentions | None,
-            Field(description="New allowed mentions configuration"),
+            Field(description="New allowed mentions config"),
         ] = None,
         thread_id: Annotated[
             str | None,
-            Field(description="Thread ID if the message is in a thread"),
+            Field(description="Thread ID"),
         ] = None,
         components: Annotated[
             list[ActionRow] | None,
-            Field(
-                description="New message components — up to 5 action rows with link buttons"
-            ),
+            Field(description="Replacement action rows with link buttons"),
         ] = None,
     ) -> dict:
         """Update content, embeds, or buttons on a message you sent."""
@@ -200,13 +183,11 @@ def register(mcp: FastMCP) -> None:
     async def modify_webhook(
         name: Annotated[
             str | None,
-            Field(description="New display name for the webhook (1-80 characters)"),
+            Field(description="Display name (1-80 chars)"),
         ] = None,
         avatar: Annotated[
             str | None,
-            Field(
-                description="Base64-encoded image data (data:image/...;base64,...)",
-            ),
+            Field(description="Base64 image data (data:image/...;base64,...)"),
         ] = None,
     ) -> dict:
         """Rename the webhook and/or change its avatar."""
@@ -225,59 +206,51 @@ def register(mcp: FastMCP) -> None:
     async def send_webhook_file(
         file_path: Annotated[
             str,
-            Field(description="Local path to the file to upload"),
+            Field(description="Local path to the file"),
         ],
         filename: Annotated[
             str | None,
-            Field(description="Override the filename shown in Discord"),
+            Field(description="Custom filename shown in Discord"),
         ] = None,
         description: Annotated[
             str | None,
-            Field(
-                description="Alt text / description for the file (max 1024 characters)"
-            ),
+            Field(description="Alt text / description (max 1024 chars)"),
         ] = None,
         content: Annotated[
             str | None,
-            Field(description="Optional text message to send alongside the file"),
+            Field(description="Optional text caption"),
         ] = None,
         embeds: Annotated[
             list[Embed] | None,
-            Field(description="Optional embeds to include alongside the file"),
+            Field(description="Embeds to include with the file"),
         ] = None,
         username: Annotated[
             str | None,
-            Field(description="Override the default webhook display name"),
+            Field(description="Custom display name"),
         ] = None,
         avatar_url: Annotated[
             str | None,
-            Field(description="Override the default webhook avatar image URL"),
+            Field(description="Custom avatar URL"),
         ] = None,
         thread_id: Annotated[
             str | None,
-            Field(description="Send to a specific thread instead of the main channel"),
+            Field(description="Send to a specific thread"),
         ] = None,
         thread_name: Annotated[
             str | None,
-            Field(description="Name for a new thread in a forum/media channel"),
+            Field(description="Thread name (creates new thread in forum/media)"),
         ] = None,
         applied_tags: Annotated[
             list[str] | None,
-            Field(description="Tag IDs to apply to the new thread"),
+            Field(description="Tag IDs for new thread"),
         ] = None,
         components: Annotated[
             list[ActionRow] | None,
-            Field(
-                description="Message components — up to 5 action rows with link buttons. "
-                "Each row can have up to 5 buttons that open URLs."
-            ),
+            Field(description="Up to 5 action rows with link buttons"),
         ] = None,
         wait: Annotated[
             bool,
-            Field(
-                description="Wait for Discord to confirm and return the created message "
-                "(includes the message id for later editing/deleting)"
-            ),
+            Field(description="Wait for confirmation (returns message ID)"),
         ] = True,
     ) -> dict:
         """Upload a local file to Discord with an optional caption."""

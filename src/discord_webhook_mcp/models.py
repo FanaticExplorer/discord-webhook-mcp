@@ -14,7 +14,7 @@ class EmbedFooter(BaseModel):
     """Footer shown at the bottom of an embed."""
 
     text: Annotated[str, Field(description="Footer text", max_length=2048)]
-    icon_url: Annotated[str | None, Field(description="URL of footer icon")] = None
+    icon_url: Annotated[str | None, Field(description="Footer icon URL")] = None
 
 
 class EmbedImage(BaseModel):
@@ -22,72 +22,68 @@ class EmbedImage(BaseModel):
 
     url: Annotated[
         str,
-        Field(
-            description="Source URL of the image (http/https or attachment://filename)",
-        ),
+        Field(description="Source URL (http/https or attachment://filename)"),
     ]
 
 
 class EmbedAuthor(BaseModel):
     """Author info shown at the top of an embed."""
 
-    name: Annotated[str, Field(description="Name of author", max_length=256)]
-    url: Annotated[str | None, Field(description="URL of author")] = None
-    icon_url: Annotated[str | None, Field(description="URL of author icon")] = None
+    name: Annotated[str, Field(description="Author name", max_length=256)]
+    url: Annotated[str | None, Field(description="Author link URL")] = None
+    icon_url: Annotated[str | None, Field(description="Author icon URL")] = None
 
 
 class EmbedField(BaseModel):
     """A single field in an embed (key-value pair)."""
 
-    name: Annotated[str, Field(description="Name of the field", max_length=256)]
-    value: Annotated[str, Field(description="Value of the field", max_length=1024)]
+    name: Annotated[str, Field(description="Field name", max_length=256)]
+    value: Annotated[str, Field(description="Field value", max_length=1024)]
     inline: Annotated[
         bool | None,
-        Field(description="Whether this field should display inline with others"),
+        Field(description="Display inline with other fields"),
     ] = None
 
 
 class Embed(BaseModel):
     """A rich embed object for Discord messages."""
 
-    title: Annotated[
-        str | None, Field(description="Title of embed", max_length=256)
-    ] = None
+    title: Annotated[str | None, Field(description="Embed title", max_length=256)] = (
+        None
+    )
     description: Annotated[
-        str | None, Field(description="Description text", max_length=4096)
+        str | None,
+        Field(description="Rich text content (max 4096 chars)", max_length=4096),
     ] = None
     url: Annotated[str | None, Field(description="URL the title links to")] = None
     timestamp: Annotated[
         str | None,
-        Field(description="ISO8601 timestamp shown at the bottom of the embed"),
+        Field(description="ISO8601 timestamp"),
     ] = None
     color: Annotated[
         int | None,
         Field(
             description=(
-                "Decimal color code for the embed's left border. "
-                "Common values: 3066993 (green), 15158332 (red), "
+                "Decimal color for left border. "
+                "Common: 3066993 (green), 15158332 (red), "
                 "3447003 (blue), 15105570 (orange), 10181046 (purple)"
             ),
         ),
     ] = None
-    footer: Annotated[
-        EmbedFooter | None, Field(description="Footer shown at bottom")
-    ] = None
-    image: Annotated[
-        EmbedImage | None, Field(description="Large image at bottom of embed")
-    ] = None
+    footer: Annotated[EmbedFooter | None, Field(description="Footer content")] = None
+    image: Annotated[EmbedImage | None, Field(description="Large image at bottom")] = (
+        None
+    )
     thumbnail: Annotated[
-        EmbedImage | None, Field(description="Small image at top-right of embed")
+        EmbedImage | None, Field(description="Small image at top-right")
     ] = None
-    author: Annotated[
-        EmbedAuthor | None, Field(description="Author block shown at the top")
-    ] = None
+    author: Annotated[EmbedAuthor | None, Field(description="Author block at top")] = (
+        None
+    )
     fields: Annotated[
         list[EmbedField] | None,
         Field(
-            description="Array of field objects (name/value pairs), max 25. "
-            "Use inline=True to put fields side-by-side in rows of up to 3."
+            description="Field rows (max 25). Use inline=True to group in rows of 3."
         ),
     ] = None
 
@@ -99,19 +95,18 @@ class AllowedMentions(BaseModel):
         list[Literal["roles", "users", "everyone"]] | None,
         Field(
             description=(
-                "Types of mentions to parse from the content. "
-                "For webhooks, only 'users' is parsed by default. "
-                "Include 'roles' to ping roles, 'everyone' for @everyone/@here."
+                "Mention types to parse. Default: only 'users' pings. "
+                "Add 'roles' or 'everyone' to enable those."
             ),
         ),
     ] = None
     roles: Annotated[
         list[str] | None,
-        Field(description="Specific role IDs allowed to mention, max 100"),
+        Field(description="Role IDs allowed to mention (max 100)"),
     ] = None
     users: Annotated[
         list[str] | None,
-        Field(description="Specific user IDs allowed to mention, max 100"),
+        Field(description="User IDs allowed to mention (max 100)"),
     ] = None
 
 
@@ -120,15 +115,15 @@ class PollMedia(BaseModel):
 
     text: Annotated[
         str | None,
-        Field(description="Text for this answer (up to 300 characters)"),
+        Field(description="Display text (max 300 chars)"),
     ] = None
     emoji_id: Annotated[
         str | None,
-        Field(description="Custom emoji ID for this answer"),
+        Field(description="Custom emoji ID"),
     ] = None
     emoji_name: Annotated[
         str | None,
-        Field(description="Emoji name for this answer"),
+        Field(description="Emoji name (e.g. 😀)"),
     ] = None
 
 
@@ -137,7 +132,7 @@ class PollAnswer(BaseModel):
 
     poll_media: Annotated[
         PollMedia,
-        Field(description="The text/emoji content for this answer"),
+        Field(description="Answer content"),
     ]
 
 
@@ -146,7 +141,7 @@ class Poll(BaseModel):
 
     question: Annotated[
         PollMedia,
-        Field(description="The poll question (text field, up to 300 characters)"),
+        Field(description="Poll question content (max 300 chars)"),
     ]
     answers: Annotated[
         list[PollAnswer],
@@ -155,14 +150,14 @@ class Poll(BaseModel):
     duration: Annotated[
         int | None,
         Field(
-            description="Duration in hours the poll is open (1-168). Defaults to 24.",
+            description="Duration in hours (1-168, default 24)",
             ge=1,
             le=168,
         ),
     ] = None
     allow_multiselect: Annotated[
         bool | None,
-        Field(description="Whether users can select multiple answers"),
+        Field(description="Allow multiple selections"),
     ] = None
 
 
@@ -182,14 +177,12 @@ class Button(BaseModel):
 
     type: int = 2  # Always 2 for button
     style: Literal[5] = 5  # Link button
-    label: Annotated[str, Field(description="Button text (max 80 characters)")]
+    label: Annotated[str, Field(description="Button label (max 80 chars)")]
     url: Annotated[
         str,
-        Field(description="URL the button opens (must be http:// or https://)"),
+        Field(description="Button URL (http/https)"),
     ]
-    disabled: Annotated[bool, Field(description="Whether the button is greyed out")] = (
-        False
-    )
+    disabled: Annotated[bool, Field(description="Grey out the button")] = False
 
 
 class ActionRow(BaseModel):
@@ -198,5 +191,5 @@ class ActionRow(BaseModel):
     type: int = 1  # Always 1 for action row
     components: Annotated[
         list[Button],
-        Field(description="Buttons in this row (max 5 per row, max 5 rows total)"),
+        Field(description="Buttons in this row (max 5 per row, max 5 rows)"),
     ]
