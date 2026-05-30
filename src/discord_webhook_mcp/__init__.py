@@ -16,6 +16,7 @@ mcp = FastMCP(
         "Works in regular channels, threads, and forum channels (with thread creation). "
         "Messages return an id for later editing, deleting, or poll-result checking."
     ),
+    dereference_schemas=False,
 )
 
 server.register(mcp)
